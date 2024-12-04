@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الديناصور</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #game {
+            position: relative;
+            width: 600px;
+            height: 200px;
+            background-color: #ffffff;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+        #dino {
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            width: 30px;
+            height: 50px;
+            background-color: green;
+            transition: bottom 0.1s;
+            border-radius: 50%; /* شكل دائري */
+        }
+        .obstacle {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 50px;
+            background-color: red;
+            animation: move 5s linear infinite;
+        }
+        @keyframes move {
+            0% { right: -20px; }
+            100% { right: 100%; }
+        }
+        #message {
+            display: none;
+            font-size: 24px;
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <div id="dino"></div>
+    </div>
+    <button id="jumpButton">🔘</button>
+    <div id="message">قيو نوب! .</div>
+
+    <script>
+        const dino = document.getElementById('dino');
+        const jumpButton = document.getElementById('jumpButton');
+        const message = document.getElementById('message');
+        let isJumping = false;
+        let lives = 1; // عدد الفرص
+
+        jumpButton.addEventListener('click', () => {
+            if (!isJumping) {
+                isJumping = true;
+                dino.style.bottom = '100px'; // القفز لأعلى
+                setTimeout(() => {
+                    dino.style.bottom = '0'; // العودة إلى الأرض
+                    isJumping = false;
+                }, 1500); // يبقى في الهواء لمدة 1.5 ثانية
+            }
+        });
+
+        function createObstacle() {
+            const obstacle = document.createElement('div');
+            obstacle.classList.add('obstacle');
+            obstacle.style.right = '0';
+            obstacle.style.animationDuration = '3s';
+            document.getElementById('game').appendChild(obstacle);
+            checkCollision(obstacle);
+            setTimeout(() => {
+                obstacle.remove();
+            }, 5000);
+        }
+
+        function checkCollision(obstacle) {
+            const interval = setInterval(() => {
+                const dinoRect = dino.getBoundingClientRect();
+                const obstacleRect = obstacle.getBoundingClientRect();
+
+                if (
+                    dinoRect.left < obstacleRect.right &&
+                    dinoRect.right > obstacleRect.left &&
+                    dinoRect.bottom > obstacleRect.top
+                ) {
+                    lives--;
+                    obstacle.remove();
+                    clearInterval(interval);
+                    if (lives <= 0) {
+                        message.style.display = 'block'; // عرض الرسالة عند الخسارة
+                        clearInterval(obstacleInterval);
+                    }
+                }
+            }, 10);
+        }
+
+        const obstacleInterval = setInterval(createObstacle, 5000); // 5 ثوانٍ بين كل حاجز
+    </script>
+</body>
+</html>
